@@ -60,9 +60,9 @@ def compute_metrics(eval_preds):
     result = {k: round(v, 4) for k, v in result.items()}
     return result
 
-def finetune_model(tokenized_books, path):
+def finetune_model(tokenized_books, model_artifact_path,mlflow_artifact_path ):
     training_args = Seq2SeqTrainingArguments(
-    output_dir="my_awesome_opus_books_model",
+    output_dir=model_artifact_path,
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=16,
@@ -94,13 +94,14 @@ def finetune_model(tokenized_books, path):
     
     mlflow.transformers.log_model(
             transformers_model=components,
-            artifact_path=path,
+            artifact_path=mlflow_artifact_path,
         )
     
 
 def argument_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--artifact_path", type=str, help="path to save model")
+    parser.add_argument("--model_artifact_path", type=str, help="path to save finetuned transformer model")
+    parser.add_argument("--mlflow_artifact_path", type=str, help="path to save mlflow model")
     args = parser.parse_args()
     return args
 
@@ -123,4 +124,4 @@ if __name__ == "__main__":
 
     tokenized_books = books.map(preprocess_function, batched=True)
     
-    finetune_model(tokenized_books, args.artifact_path)
+    finetune_model(tokenized_books, args.model_artifact_path, args.mlflow_artifact_path)
